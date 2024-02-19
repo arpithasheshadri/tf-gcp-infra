@@ -35,3 +35,7 @@ variable "webapp_route_name" {
 variable "webapp_route_range" {
   description  = "Router range for webapp route"
 }
+
+variable "webapp_port" {
+  description  = "webapp application port"
+}
