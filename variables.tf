@@ -16,6 +16,10 @@ variable "webapp_subnet_name" {
   description  = "Subnet name for webapp"
 }
 
+variable "vpc_regional" {
+  description  = "routing mode for vpc"
+}
+
 variable "db_subnet_name" {
   description  = "Subnet name for db"
 }
@@ -38,4 +42,34 @@ variable "webapp_route_range" {
 
 variable "webapp_port" {
   description  = "webapp application port"
+}
+
+variable "vm_name" {
+  description = "The name of the VM instance"
+  type        = string  
+}
+
+variable "vm_zone" {
+  description = "The zone for the VM instance"
+  type        = string
+}
+
+variable "vm_machine_type" {
+  description = "The machine type for the VM instance"
+  type        = string
+}
+
+variable "vm_image" {
+  description = "The custom image for the VM boot disk"
+  type        = string
+}
+
+variable "vm_disk_type" {
+  description = "The disk type for the VM boot disk"
+  type        = string
+}
+
+variable "vm_disk_size_gb" {
+  description = "The size of the VM boot disk in GB"
+  type        = number
 }
