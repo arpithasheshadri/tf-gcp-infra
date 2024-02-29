@@ -25,50 +25,50 @@ resource "google_compute_route" "webapp_route" {
   name             = var.webapp_route_name
   dest_range       = var.webapp_route_range
   network          = google_compute_network.vpc_network.self_link
-  next_hop_gateway = "default-internet-gateway"
+  next_hop_gateway = var.default_internet_gateway
   priority         = 1000
 
 }
 
 resource "google_compute_firewall" "webapp_allow_firewall" {
-  name    = "webapp-apply-firewall"
+  name    = var.webapp_allow_name
   network = google_compute_network.vpc_network.self_link
   allow {
-    protocol = "tcp"
-    ports    = [var.webapp_port, "22"]
+    protocol = var.protocol_tcp
+    ports    = [var.webapp_port, var.tcp_port]
   }
-  target_tags   = ["http-server"]
-  source_ranges = ["0.0.0.0/0"]
+  target_tags   = [var.target_tag_name]
+  source_ranges = [var.source_ranges_cidr]
 }
 
 resource "google_compute_firewall" "db_allow_firewall" {
-  name    = "db-apply-firewall"
+  name    = var.db_allow_name
   network = google_compute_network.vpc_network.self_link
   allow {
-    protocol = "tcp"
-    ports    = ["5432"]
+    protocol = var.protocol_tcp
+    ports    = [var.db_port]
   }
-  target_tags   = ["http-server"]
+  target_tags   = [var.target_tag_name]
   source_ranges = [google_compute_subnetwork.webapp_subnet.ip_cidr_range]
 }
 
-# resource "google_compute_firewall" "webapp_deny_firewall" {
-#   name    = "webapp-deny-firewall"
-#   network = google_compute_network.vpc_network.self_link
-#   deny {
-#     protocol = "tcp"
-#     ports    = ["22"]
-#   }
-#   source_ranges = ["0.0.0.0/0"]
-# }
+resource "google_compute_firewall" "webapp_deny_firewall" {
+  name    = var.webapp_deny_name
+  network = google_compute_network.vpc_network.self_link
+  deny {
+    protocol = var.protocol_tcp
+    ports    = [var.tcp_port]
+  }
+  source_ranges = [var.source_ranges_cidr]
+}
 
 resource "google_compute_global_address" "internal_ip_private_access" {
   project       = google_compute_network.vpc_network.project
   name          = var.vpc_private_service_access
   address_type  = var.private_access_address_type
-  purpose       = "VPC_PEERING"
+  purpose       = var.global_address_purpose
   network       = google_compute_network.vpc_network.id
-  prefix_length = 20
+  prefix_length = var.prefix_address_length
 }
 
 
@@ -118,9 +118,9 @@ resource "google_sql_user" "db_user" {
 
 resource "google_service_networking_connection" "private_vpc_connection" {
   network                 = google_compute_network.vpc_network.id
-  service                 = "servicenetworking.googleapis.com"
+  service                 = var.service_networking_api
   reserved_peering_ranges = [google_compute_global_address.internal_ip_private_access.name]
-  deletion_policy         = "ABANDON"
+  deletion_policy         = var.deletion_policy_type
 }
 
 resource "google_compute_instance" "cloud_vpc_instance" {
@@ -142,7 +142,7 @@ resource "google_compute_instance" "cloud_vpc_instance" {
 
     }
   }
-  tags = ["http-server"]
+  tags = [var.target_tag_name]
   depends_on = [
     google_compute_subnetwork.webapp_subnet,
     google_compute_firewall.webapp_allow_firewall,

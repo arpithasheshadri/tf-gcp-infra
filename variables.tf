@@ -156,3 +156,62 @@ variable "db_dialect" {
 variable "db_port" {
   type = string
 }
+
+variable "default_internet_gateway" {
+  type = string
+}
+
+variable "tcp_port" {
+  type        = string
+  description = "tcp port value"
+}
+
+variable "protocol_tcp" {
+  type        = string
+  description = "protocol name used in firewall"
+}
+
+variable "target_tag_name" {
+  type        = string
+  description = "target type used in firewalls"
+}
+
+variable "webapp_allow_name" {
+  type        = string
+  description = "firewall name"
+}
+
+variable "db_allow_name" {
+  type        = string
+  description = "firewall name"
+}
+
+variable "webapp_deny_name" {
+  type        = string
+  description = "firewall name"
+}
+
+variable "source_ranges_cidr" {
+  type        = string
+  description = "firewall source ranges"
+}
+
+variable "global_address_purpose" {
+  type        = string
+  description = "global compute address purpose"
+}
+
+variable "prefix_address_length" {
+  type        = string
+  description = "prefix length for private ip address"
+}
+
+variable "deletion_policy_type" {
+  type        = string
+  description = "deletion policy type"
+}
+
+variable "service_networking_api" {
+  type        = string
+  description = "service networking gcp api"
+}
