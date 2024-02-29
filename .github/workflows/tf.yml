@@ -21,7 +21,7 @@ jobs:
 
       - name: Format Packer template
         run: |
-          terraform fmt . -check -diff .
+          terraform fmt -check -diff .
           if [ $? -ne 0 ]; then
             echo "Terraform templates need formatting. Run 'terraform fmt .' locally and push the changes."
             exit 1
