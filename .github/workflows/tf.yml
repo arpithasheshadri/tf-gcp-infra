@@ -18,6 +18,14 @@ jobs:
  
       - name: Terraform Init
         run: terraform init
+
+      - name: Format Packer template
+        run: |
+          terraform fmt . -check -diff .
+          if [ $? -ne 0 ]; then
+            echo "Terraform templates need formatting. Run 'terraform fmt .' locally and push the changes."
+            exit 1
+          fi
  
       - name: Terraform Validate
         run: terraform validate
