@@ -16,7 +16,7 @@ resource "google_compute_subnetwork" "webapp_subnet" {
 
 resource "google_compute_subnetwork" "db_subnet" {
   name          = var.db_subnet_name
-    ip_cidr_range = var.db_subnet_cidr
+  ip_cidr_range = var.db_subnet_cidr
   network       = google_compute_network.vpc_network.self_link
   region        = var.region
 }
