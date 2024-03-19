@@ -35,7 +35,7 @@ resource "google_compute_firewall" "webapp_allow_firewall" {
   network = google_compute_network.vpc_network.self_link
   allow {
     protocol = var.protocol_tcp
-    ports    = [var.webapp_port, var.tcp_port]
+    ports    = [var.webapp_port]
   }
   target_tags   = [var.target_tag_name]
   source_ranges = [var.source_ranges_cidr]
@@ -52,15 +52,15 @@ resource "google_compute_firewall" "db_allow_firewall" {
   source_ranges = [google_compute_subnetwork.webapp_subnet.ip_cidr_range]
 }
 
-# resource "google_compute_firewall" "webapp_deny_firewall" {
-#   name    = var.webapp_deny_name
-#   network = google_compute_network.vpc_network.self_link
-#   deny {
-#     protocol = var.protocol_tcp
-#     ports    = [var.tcp_port]
-#   }
-#   source_ranges = [var.source_ranges_cidr]
-# }
+resource "google_compute_firewall" "webapp_deny_firewall" {
+  name    = var.webapp_deny_name
+  network = google_compute_network.vpc_network.self_link
+  deny {
+    protocol = var.protocol_tcp
+    ports    = [var.tcp_port]
+  }
+  source_ranges = [var.source_ranges_cidr]
+}
 
 resource "google_compute_global_address" "internal_ip_private_access" {
   project       = google_compute_network.vpc_network.project
@@ -142,6 +142,7 @@ resource "google_dns_record_set" "webapp_record" {
 resource "google_service_account" "service_account" {
   account_id   = var.service_account_id
   display_name = var.service_account_name
+  project = var.project_id
 }
 
 resource "google_project_iam_binding" "webapp_log_binding" {
