@@ -215,3 +215,44 @@ variable "service_networking_api" {
   type        = string
   description = "service networking gcp api"
 }
+
+variable "webapp_zone_name" {
+  type        = string
+  description = "zone name for webapp"
+}
+
+variable "record_type" {
+  type        = string
+  description = "record type for dns"
+}
+
+variable "ttl_value" {
+  type        = number
+  description = "ttl value"
+}
+
+variable "service_account_id" {
+  type = string
+  description = "service account id"
+}
+
+variable "service_account_name" {
+  type = string
+  description = "service account namr"
+}
+
+variable "service_acc_log_role" {
+  type = string
+  description = "service account role value"
+}
+
+variable "service_acc_monitor_role" {
+  type = string
+  description = "service account role value"
+}
+
+variable "vm_service_acc_scope" {
+  type = string
+  description = "service account scopes"
+}
+

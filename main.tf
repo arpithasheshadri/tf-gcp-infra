@@ -52,15 +52,15 @@ resource "google_compute_firewall" "db_allow_firewall" {
   source_ranges = [google_compute_subnetwork.webapp_subnet.ip_cidr_range]
 }
 
-resource "google_compute_firewall" "webapp_deny_firewall" {
-  name    = var.webapp_deny_name
-  network = google_compute_network.vpc_network.self_link
-  deny {
-    protocol = var.protocol_tcp
-    ports    = [var.tcp_port]
-  }
-  source_ranges = [var.source_ranges_cidr]
-}
+# resource "google_compute_firewall" "webapp_deny_firewall" {
+#   name    = var.webapp_deny_name
+#   network = google_compute_network.vpc_network.self_link
+#   deny {
+#     protocol = var.protocol_tcp
+#     ports    = [var.tcp_port]
+#   }
+#   source_ranges = [var.source_ranges_cidr]
+# }
 
 resource "google_compute_global_address" "internal_ip_private_access" {
   project       = google_compute_network.vpc_network.project
@@ -123,6 +123,47 @@ resource "google_service_networking_connection" "private_vpc_connection" {
   deletion_policy         = var.deletion_policy_type
 }
 
+data "google_dns_managed_zone" "webapp_zone" {
+  name = var.webapp_zone_name
+}
+
+resource "google_dns_record_set" "webapp_record" {
+  name    = data.google_dns_managed_zone.webapp_zone.dns_name
+  type    = var.record_type
+  ttl     = var.ttl_value
+  managed_zone = data.google_dns_managed_zone.webapp_zone.name
+
+  rrdatas = [
+    google_compute_instance.cloud_vpc_instance.network_interface.0.access_config.0.nat_ip 
+  ]
+  
+}
+
+resource "google_service_account" "service_account" {
+  account_id   = var.service_account_id
+  display_name = var.service_account_name
+}
+
+resource "google_project_iam_binding" "webapp_log_binding" {
+  project = var.project_id
+  role    = var.service_acc_log_role
+
+  members = [
+    "serviceAccount:${google_service_account.service_account.email}",
+  ]
+}
+
+resource "google_project_iam_binding" "webapp_monitor_binding" {
+  project = var.project_id
+  role    = var.service_acc_monitor_role
+
+  members = [
+    "serviceAccount:${google_service_account.service_account.email}",
+  ]
+}
+
+
+
 resource "google_compute_instance" "cloud_vpc_instance" {
   name         = var.vm_name
   machine_type = var.vm_machine_type
@@ -148,6 +189,12 @@ resource "google_compute_instance" "cloud_vpc_instance" {
     google_compute_firewall.webapp_allow_firewall,
     google_compute_firewall.db_allow_firewall
   ]
+  allow_stopping_for_update = true
+  service_account {
+    email  = google_service_account.service_account.email
+    scopes = [var.vm_service_acc_scope]
+    
+  }
 
   metadata_startup_script = <<-EOT
     #!/bin/bash
@@ -165,4 +212,5 @@ resource "google_compute_instance" "cloud_vpc_instance" {
   EOT
 
 }
+
 
