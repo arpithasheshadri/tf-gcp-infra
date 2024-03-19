@@ -128,21 +128,21 @@ data "google_dns_managed_zone" "webapp_zone" {
 }
 
 resource "google_dns_record_set" "webapp_record" {
-  name    = data.google_dns_managed_zone.webapp_zone.dns_name
-  type    = var.record_type
-  ttl     = var.ttl_value
+  name         = data.google_dns_managed_zone.webapp_zone.dns_name
+  type         = var.record_type
+  ttl          = var.ttl_value
   managed_zone = data.google_dns_managed_zone.webapp_zone.name
 
   rrdatas = [
-    google_compute_instance.cloud_vpc_instance.network_interface.0.access_config.0.nat_ip 
+    google_compute_instance.cloud_vpc_instance.network_interface.0.access_config.0.nat_ip
   ]
-  
+
 }
 
 resource "google_service_account" "service_account" {
   account_id   = var.service_account_id
   display_name = var.service_account_name
-  project = var.project_id
+  project      = var.project_id
 }
 
 resource "google_project_iam_binding" "webapp_log_binding" {
@@ -194,7 +194,7 @@ resource "google_compute_instance" "cloud_vpc_instance" {
   service_account {
     email  = google_service_account.service_account.email
     scopes = [var.vm_service_acc_scope]
-    
+
   }
 
   metadata_startup_script = <<-EOT

@@ -232,27 +232,27 @@ variable "ttl_value" {
 }
 
 variable "service_account_id" {
-  type = string
+  type        = string
   description = "service account id"
 }
 
 variable "service_account_name" {
-  type = string
+  type        = string
   description = "service account namr"
 }
 
 variable "service_acc_log_role" {
-  type = string
+  type        = string
   description = "service account role value"
 }
 
 variable "service_acc_monitor_role" {
-  type = string
+  type        = string
   description = "service account role value"
 }
 
 variable "vm_service_acc_scope" {
-  type = string
+  type        = string
   description = "service account scopes"
 }
 
