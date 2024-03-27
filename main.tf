@@ -35,7 +35,7 @@ resource "google_compute_firewall" "webapp_allow_firewall" {
   network = google_compute_network.vpc_network.self_link
   allow {
     protocol = var.protocol_tcp
-    ports    = [var.webapp_port]
+    ports    = [var.webapp_port, var.tcp_port]
   }
   target_tags   = [var.target_tag_name]
   source_ranges = [var.source_ranges_cidr]
@@ -52,15 +52,15 @@ resource "google_compute_firewall" "db_allow_firewall" {
   source_ranges = [google_compute_subnetwork.webapp_subnet.ip_cidr_range]
 }
 
-resource "google_compute_firewall" "webapp_deny_firewall" {
-  name    = var.webapp_deny_name
-  network = google_compute_network.vpc_network.self_link
-  deny {
-    protocol = var.protocol_tcp
-    ports    = [var.tcp_port]
-  }
-  source_ranges = [var.source_ranges_cidr]
-}
+# resource "google_compute_firewall" "webapp_deny_firewall" {
+#   name    = var.webapp_deny_name
+#   network = google_compute_network.vpc_network.self_link
+#   deny {
+#     protocol = var.protocol_tcp
+#     ports    = [var.tcp_port]
+#   }
+#   source_ranges = [var.source_ranges_cidr]
+# }
 
 resource "google_compute_global_address" "internal_ip_private_access" {
   project       = google_compute_network.vpc_network.project
@@ -139,6 +139,126 @@ resource "google_dns_record_set" "webapp_record" {
 
 }
 
+resource "google_dns_record_set" "txt_record_spf" {
+  name         = "mg.${data.google_dns_managed_zone.webapp_zone.dns_name}"
+  type         = var.txt_record_type
+  ttl          = var.ttl_value
+  managed_zone = data.google_dns_managed_zone.webapp_zone.name
+
+  rrdatas = [
+    var.text_record_spf
+  ]
+
+}
+
+resource "google_dns_record_set" "txt_record_dkim" {
+  name         = "mailo._domainkey.mg.${data.google_dns_managed_zone.webapp_zone.dns_name}"
+  type         = var.txt_record_type
+  ttl          = var.ttl_value
+  managed_zone = data.google_dns_managed_zone.webapp_zone.name
+
+  rrdatas = [
+    var.txt_record_dkim
+  ]
+
+}
+
+resource "google_dns_record_set" "mx_record" {
+  name         = "mg.${data.google_dns_managed_zone.webapp_zone.dns_name}"
+  type         = var.mx_record_type
+  ttl          = var.ttl_value
+  managed_zone = data.google_dns_managed_zone.webapp_zone.name
+
+  rrdatas = [
+    var.mx_record_1, var.mx_record_2
+  ]
+
+}
+
+resource "google_dns_record_set" "cname" {
+  name         = "email.mg.${data.google_dns_managed_zone.webapp_zone.dns_name}"
+  managed_zone = data.google_dns_managed_zone.webapp_zone.name
+  type         = var.cname_record_type
+  ttl          = var.ttl_value
+  rrdatas = [
+    var.cname_value
+  ]
+}
+
+resource "google_pubsub_topic" "verify_pub_sub" {
+  name                       = var.pubsub_topic
+  message_retention_duration = var.pubsub_duration
+}
+
+resource "google_pubsub_subscription" "verify_email_subscription" {
+  name                 = var.pubsub_subscription
+  topic                = google_pubsub_topic.verify_pub_sub.name
+  ack_deadline_seconds = 10
+  push_config {
+    push_endpoint = google_cloudfunctions2_function.verify_email_function.url
+  }
+}
+resource "google_storage_bucket" "bucket" {
+  name     = var.bucket_name
+  location = var.bucket_region
+}
+
+resource "google_storage_bucket_object" "archive" {
+  name   = var.archive_name
+  bucket = google_storage_bucket.bucket.name
+  source = var.cloud_function_path
+}
+
+resource "google_vpc_access_connector" "vpc_connector" {
+  name          = var.vpc_connector_name
+  network       = google_compute_network.vpc_network.self_link
+  region        = var.region
+  ip_cidr_range = var.vpc_connector_ip
+}
+
+resource "google_cloudfunctions2_function" "verify_email_function" {
+  name        = var.email_function_name
+  description = var.cloud_func_desc
+  location    = var.region
+  build_config {
+    runtime     = var.node_version
+    entry_point = var.cloud_func_entry_point
+    source {
+      storage_source {
+        bucket = var.bucket_name
+        object = var.archive_name
+      }
+    }
+  }
+  service_config {
+    max_instance_count    = 1
+    available_memory      = "256M"
+    service_account_email = google_service_account.service_account.email
+    vpc_connector         = google_vpc_access_connector.vpc_connector.name
+    environment_variables = {
+      S_PORT             = "${var.webapp_port_n}"
+      DB_PORT            = "${var.db_port}"
+      DB_NAME            = "${var.db_name}"
+      DB_DIALECT         = "${var.db_dialect}"
+      DB_HOST            = "${google_sql_database_instance.db_instance.ip_address.0.ip_address}"
+      DB_PASSWORD        = "${google_sql_user.db_user.password}"
+      DB_USER            = "${google_sql_user.db_user.name}"
+      MAILGUN_API_KEY    = "${var.mailgun_api_key}"
+      MAILGUN_DOMAIN     = "${var.mailgun_domain}"
+      MAILGUN_FROM_EMAIL = "${var.mailgun_from_email}"
+      S_DNS_NAME         = "${var.dns_name}"
+    }
+  }
+
+  event_trigger {
+    trigger_region = var.region
+    event_type     = var.pubsub_event_type
+    pubsub_topic   = google_pubsub_topic.verify_pub_sub.id
+    retry_policy   = var.retry_policy
+  }
+}
+
+
 resource "google_service_account" "service_account" {
   account_id   = var.service_account_id
   display_name = var.service_account_name
@@ -161,6 +281,46 @@ resource "google_project_iam_binding" "webapp_monitor_binding" {
   members = [
     "serviceAccount:${google_service_account.service_account.email}",
   ]
+}
+
+resource "google_project_iam_binding" "pubsub_service_account_binding" {
+  project = var.project_id
+  role    = var.service_acc_token_creator
+
+  members = [
+    "serviceAccount:${google_service_account.service_account.email}"
+  ]
+}
+
+
+data "google_iam_policy" "pubsub_editor" {
+  binding {
+    role = var.service_acc_roles_editor
+    members = [
+      "serviceAccount:${google_service_account.service_account.email}",
+    ]
+  }
+}
+
+data "google_iam_policy" "pubsub_publisher" {
+  binding {
+    role = var.service_acc_roles_publisher
+    members = [
+      "serviceAccount:${google_service_account.service_account.email}",
+    ]
+  }
+}
+
+resource "google_pubsub_topic_iam_policy" "publisher_policy" {
+  project     = google_pubsub_topic.verify_pub_sub.project
+  topic       = google_pubsub_topic.verify_pub_sub.name
+  policy_data = data.google_iam_policy.pubsub_publisher.policy_data
+}
+
+
+resource "google_pubsub_subscription_iam_policy" "editor" {
+  subscription = google_pubsub_subscription.verify_email_subscription.name
+  policy_data  = data.google_iam_policy.pubsub_editor.policy_data
 }
 
 
@@ -210,6 +370,7 @@ resource "google_compute_instance" "cloud_vpc_instance" {
     echo "HOST=${google_sql_database_instance.db_instance.ip_address.0.ip_address}" >> "$env_file"
     echo "PASSWORD=${google_sql_user.db_user.password}" >> "$env_file"
     echo "USER=${google_sql_user.db_user.name}" >> "$env_file"
+    echo "APP_ENV=${var.app_env}" >> "$env_file"
   EOT
 
 }
