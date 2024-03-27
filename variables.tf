@@ -256,3 +256,157 @@ variable "vm_service_acc_scope" {
   description = "service account scopes"
 }
 
+variable "bucket_name" {
+  type        = string
+  description = "name of the bucket"
+}
+
+variable "archive_name" {
+  type        = string
+  description = "archive object name"
+}
+
+variable "app_env" {
+  type        = string
+  description = "Application environment variable"
+}
+
+variable "mailgun_api_key" {
+  type        = string
+  description = "Mailgun api key"
+}
+
+variable "mailgun_domain" {
+  type        = string
+  description = "Mailgun domain"
+}
+
+variable "mailgun_from_email" {
+  type        = string
+  description = "Mailgun from email"
+}
+
+variable "dns_name" {
+  type        = string
+  description = "Dns name"
+}
+
+variable "service_acc_token_creator" {
+  type        = string
+  description = "Token creator role"
+}
+
+variable "service_acc_roles_editor" {
+  type        = string
+  description = "Role editor"
+}
+
+variable "service_acc_roles_publisher" {
+  type        = string
+  description = "Role publisher"
+}
+
+variable "retry_policy" {
+  type        = string
+  description = "Retry policy"
+}
+
+variable "pubsub_event_type" {
+  type        = string
+  description = "Event type"
+}
+
+variable "cloud_func_entry_point" {
+  type        = string
+  description = "Entry point"
+}
+
+variable "node_version" {
+  type        = string
+  description = "Node version"
+}
+
+variable "email_function_name" {
+  type        = string
+  description = "Email function name"
+}
+
+variable "vpc_connector_ip" {
+  type        = string
+  description = "Vpc connector ip"
+}
+
+variable "vpc_connector_name" {
+  type        = string
+  description = "Vpc connector name"
+}
+
+variable "cloud_func_desc" {
+  type        = string
+  description = "Cloud function description"
+}
+
+variable "cloud_function_path" {
+  type        = string
+  description = "Cloud function path"
+}
+
+variable "pubsub_subscription" {
+  type        = string
+  description = "Pubsub subscription"
+}
+
+variable "pubsub_topic" {
+  type        = string
+  description = "Pubsub topic"
+}
+
+variable "bucket_region" {
+  type        = string
+  description = "us"
+}
+
+variable "pubsub_duration" {
+  type        = string
+  description = "pubsub duration"
+}
+
+variable "text_record_spf" {
+  type        = string
+  description = "text record spf"
+}
+
+variable "txt_record_dkim" {
+  type        = string
+  description = "text record dkim"
+}
+
+variable "txt_record_type" {
+  type        = string
+  description = "text record type"
+}
+
+variable "mx_record_1" {
+  type        = string
+  description = "mx record one"
+}
+
+variable "mx_record_2" {
+  type        = string
+  description = "mx record second"
+}
+
+variable "mx_record_type" {
+  type        = string
+  description = "mx record type"
+}
+
+variable "cname_record_type" {
+  type        = string
+  description = "cname record type"
+}
+
+variable "cname_value" {
+  type        = string
+  description = "cname value"
+}
