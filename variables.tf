@@ -410,3 +410,163 @@ variable "cname_value" {
   type        = string
   description = "cname value"
 }
+
+variable "lb_target_tag_name" {
+  type        = string
+  description = " health check tag name"
+}
+
+variable "firewall_direction" {
+  type        = string
+  description = "firewall direction"
+}
+
+variable "firewall_start_range" {
+  type        = string
+  description = "firewall start range"
+}
+
+variable "firewall_end_range" {
+  type        = string
+  description = "firewall end range"
+}
+
+variable "lb_firewall" {
+  type        = string
+  description = "lb firewall name"
+}
+
+variable "https_port" {
+  type        = string
+  description = "https port"
+}
+
+variable "healthcheck_name" {
+  type        = string
+  description = "healthcheck name"
+}
+
+variable "timeout_sec" {
+  type        = number
+  description = "timeout seconds"
+}
+
+variable "check_interval_sec" {
+  type        = number
+  description = "check interval seconds"
+}
+
+variable "healthy_threshold" {
+  type        = number
+  description = "healthy threshold"
+}
+
+variable "unhealthy_threshold" {
+  type        = number
+  description = "unhealthy threshold"
+}
+
+variable "gloabl_address_name" {
+  type        = number
+  description = "gloabl address name"
+}
+
+variable "autoscaler_name" {
+  type        = number
+  description = "autoscaler name"
+}
+
+variable "max_replicas" {
+  type        = number
+  description = "max replicas"
+}
+
+variable "min_replicas" {
+  type        = number
+  description = "min replicas"
+}
+
+variable "cooldown_period" {
+  type        = number
+  description = "cooldown period"
+}
+
+variable "https_proxy" {
+  type        = number
+  description = "https proxy name"
+}
+
+variable "ssl_cert_name" {
+  type        = number
+  description = "ssl certificate name"
+}
+
+variable "url_map" {
+  type        = string
+  description = "url map name"
+}
+
+variable "backend_service" {
+  type        = string
+  description = "backend service"
+}
+
+variable "http_port_name" {
+  type        = string
+  description = "http port name"
+}
+
+variable "http_protocol" {
+  type        = string
+  description = "http protocol"
+}
+
+variable "balancing_scheme" {
+  type        = string
+  description = "load balancing scheme"
+}
+
+variable "session_affinity" {
+  type        = string
+  description = "load balancing scheme"
+}
+
+variable "balancing_mode" {
+  type        = string
+  description = "load balancing mode"
+}
+
+variable "network_tier" {
+  type        = string
+  description = "network tier name"
+}
+
+variable "forwarding_rule" {
+  type        = string
+  description = "forwarding rule"
+}
+
+variable "ip_protocol" {
+  type        = string
+  description = "ip protocol value"
+}
+
+variable "webapp_group_manager" {
+  type        = string
+  description = "webapp group manager"
+}
+
+variable "initial_delay_sec" {
+  type        = number
+  description = "initial delay seconds"
+}
+
+variable "base_name" {
+  type        = string
+  description = "base instance name"
+}
+
+variable "target_size" {
+  type        = number
+  description = "target size"
+}
