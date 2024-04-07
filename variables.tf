@@ -467,12 +467,12 @@ variable "unhealthy_threshold" {
 }
 
 variable "gloabl_address_name" {
-  type        = number
+  type        = string
   description = "gloabl address name"
 }
 
 variable "autoscaler_name" {
-  type        = number
+  type        = string
   description = "autoscaler name"
 }
 
@@ -492,12 +492,12 @@ variable "cooldown_period" {
 }
 
 variable "https_proxy" {
-  type        = number
+  type        = string
   description = "https proxy name"
 }
 
 variable "ssl_cert_name" {
-  type        = number
+  type        = string
   description = "ssl certificate name"
 }
 
