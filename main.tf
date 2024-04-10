@@ -98,6 +98,9 @@ resource "google_sql_database_instance" "db_instance" {
 
   depends_on = [google_service_networking_connection.private_vpc_connection]
 
+  encryption_key_name = google_kms_crypto_key.crypto_key_cloudsql.id
+
+
   settings {
     availability_type = var.db_availability_type
     disk_type         = var.db_disk_type
@@ -213,7 +216,11 @@ resource "google_pubsub_subscription" "verify_email_subscription" {
 }
 resource "google_storage_bucket" "bucket" {
   name     = var.bucket_name
-  location = var.bucket_region
+  location = var.region
+  encryption {
+    default_kms_key_name = google_kms_crypto_key.crypto_key_bucket.id
+  }
+  depends_on = [ google_kms_crypto_key_iam_binding.encrypter_decrypter ]
 }
 
 resource "google_storage_bucket_object" "archive" {
@@ -233,6 +240,8 @@ resource "google_cloudfunctions2_function" "verify_email_function" {
   name        = var.email_function_name
   description = var.cloud_func_desc
   location    = var.region
+
+  depends_on = [google_service_account.cloud_func_service_account]
   build_config {
     runtime     = var.node_version
     entry_point = var.cloud_func_entry_point
@@ -264,18 +273,65 @@ resource "google_cloudfunctions2_function" "verify_email_function" {
   }
 
   event_trigger {
-    trigger_region = var.region
-    event_type     = var.pubsub_event_type
-    pubsub_topic   = google_pubsub_topic.verify_pub_sub.id
-    retry_policy   = var.retry_policy
+    service_account_email = google_service_account.cloud_func_service_account.email
+    trigger_region        = var.region
+    event_type            = var.pubsub_event_type
+    pubsub_topic          = google_pubsub_topic.verify_pub_sub.id
+    retry_policy          = var.retry_policy
   }
 }
 
+resource "google_project_service_identity" "gcp_sa_cloud_sql" {
+  provider = google-beta
+  service  = "sqladmin.googleapis.com"
+  project = var.project_id
+}
+
+resource "google_kms_crypto_key_iam_binding" "crypto_key" {
+  crypto_key_id = google_kms_crypto_key.crypto_key_cloudsql.id
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+
+  members = [
+    "serviceAccount:${google_project_service_identity.gcp_sa_cloud_sql.email}",
+  ]
+}
+
+
+resource "google_service_account" "cloud_storage_service_acc" {
+  account_id   = "cloud-storage-service-acc"
+  display_name = "Cloud Storage Service Account"
+  project = var.project_id
+}
 
 resource "google_service_account" "service_account" {
   account_id   = var.service_account_id
   display_name = var.service_account_name
   project      = var.project_id
+}
+
+resource "google_service_account" "cloud_func_service_account" {
+  account_id   = var.cloud_service_account_id
+  display_name = var.cloud_service_account_name
+  project      = var.project_id
+}
+
+
+
+resource "google_project_iam_binding" "cloud_function_invoker" {
+  project = var.project_id
+  role    = var.cloud_function_invoker_role
+  members = [
+    "serviceAccount:${google_service_account.cloud_func_service_account.email}",
+  ]
+}
+
+resource "google_project_iam_binding" "cloud_run_invoker" {
+  project = var.project_id
+  role    = var.cloud_run_invoker_role
+
+  members = [
+    "serviceAccount:${google_service_account.cloud_func_service_account.email}",
+  ]
 }
 
 resource "google_project_iam_binding" "webapp_log_binding" {
@@ -460,7 +516,12 @@ resource "google_compute_region_instance_template" "cloud_vpc_instance_template"
     source_image = var.vm_image
     boot         = true
     auto_delete  = true
+    disk_encryption_key {
+      kms_key_self_link = google_kms_crypto_key.crypto_key_vms.id
+    }
   }
+
+  depends_on = [ google_kms_crypto_key_iam_binding.vm_encrypter_decrypter ]
 
   network_interface {
     network    = google_compute_network.vpc_network.self_link
@@ -493,6 +554,64 @@ resource "google_compute_region_instance_template" "cloud_vpc_instance_template"
 }
 
 
+resource "google_kms_key_ring" "webapp_keyring" {
+  name     = var.key_ring_name
+  location = var.region
+}
+
+resource "google_kms_crypto_key" "crypto_key_vms" {
+  name            = var.vm_key
+  key_ring        = google_kms_key_ring.webapp_keyring.id
+  rotation_period = "2592000s"
+lifecycle {
+    prevent_destroy = false
+  }
+
+}
+
+resource "google_kms_crypto_key" "crypto_key_cloudsql" {
+  name            = var.cloud_sql_key
+  key_ring        = google_kms_key_ring.webapp_keyring.id
+  rotation_period = "2592000s"
+lifecycle {
+    prevent_destroy = false
+  }
+ 
+}
+
+resource "google_kms_crypto_key" "crypto_key_bucket" {
+  name            = var.bucket_key
+  key_ring        = google_kms_key_ring.webapp_keyring.id
+  rotation_period = "2592000s"
+  lifecycle {
+    prevent_destroy = false
+  }
+  
+}
+
+data "google_storage_project_service_account" "gcs_account" {
+}
+
+
+resource "google_kms_crypto_key_iam_binding" "encrypter_decrypter" {
+  crypto_key_id = google_kms_crypto_key.crypto_key_bucket.id
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+
+  members = ["serviceAccount:${data.google_storage_project_service_account.gcs_account.email_address}"]
+
+}
+
+
+data "google_project" "project" {}
+
+resource "google_kms_crypto_key_iam_binding" "vm_encrypter_decrypter" {
+  crypto_key_id = google_kms_crypto_key.crypto_key_vms.id
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+
+  members = [
+    "serviceAccount:service-${data.google_project.project.number}@compute-system.iam.gserviceaccount.com",
+  ]
+}
 
 
 
