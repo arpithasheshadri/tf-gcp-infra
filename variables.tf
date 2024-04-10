@@ -610,3 +610,58 @@ variable "key_ring_name" {
   description = "Key Ring"
   type        = string
 }
+
+variable "sql_admin_api" {
+  description = "SQL Admin api"
+  type = string
+}
+
+variable "crypto_encrypter_decrypter" {
+  description = "Encrypter Decrypter role"
+  type = string
+}
+
+variable "cloud_storage_acc_id" {
+  description = "Cloud storage acc id"
+  type = string
+}
+
+variable "cloud_storage_display_name" {
+  description = "Cloud storage display name"
+  type = string
+}
+
+variable "role_instance_admin" {
+  description = "Role instance admin"
+  type = string
+}
+
+variable "backend_timeout" {
+  description = "Backend timeout"
+  type        = number
+  default     = 30
+}
+
+variable "capacity_scaler_val" {
+  description = "Capacity scaler value"
+  type        = number
+  default     = 1.0
+}
+
+variable "secret_id" {
+  description = "Secret ID"
+  type        = string
+  default     = "webapp_secret"
+}
+
+variable "rotation_period" {
+  description = "Rotation period"
+  type        = string
+  default     = "2592000s"
+}
+
+variable "cpu_util" {
+  description = "CPU utilization"
+  type        = number
+  default     = 0.2
+}
