@@ -570,3 +570,43 @@ variable "target_size" {
   type        = number
   description = "target size"
 }
+
+variable "cloud_function_invoker_role" {
+  description = "The IAM role for invoking Cloud Functions"
+  type        = string
+}
+
+variable "cloud_run_invoker_role" {
+  description = "The IAM role for invoking Cloud Run services"
+  type        = string
+}
+
+variable "cloud_service_account_id" {
+  description = "Cloud service account id"
+  type        = string
+}
+
+variable "cloud_service_account_name" {
+  description = "Cloud service account name"
+  type        = string
+}
+
+variable "cloud_sql_key" {
+  description = "cloud sql Key"
+  type        = string
+}
+
+variable "bucket_key" {
+  description = "bucket Key"
+  type        = string
+}
+
+variable "vm_key" {
+  description = "vm Key"
+  type        = string
+}
+
+variable "key_ring_name" {
+  description = "Key Ring"
+  type        = string
+}
