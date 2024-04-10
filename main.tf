@@ -220,7 +220,7 @@ resource "google_storage_bucket" "bucket" {
   encryption {
     default_kms_key_name = google_kms_crypto_key.crypto_key_bucket.id
   }
-  depends_on = [ google_kms_crypto_key_iam_binding.encrypter_decrypter ]
+  depends_on = [google_kms_crypto_key_iam_binding.encrypter_decrypter]
 }
 
 resource "google_storage_bucket_object" "archive" {
@@ -284,7 +284,7 @@ resource "google_cloudfunctions2_function" "verify_email_function" {
 resource "google_project_service_identity" "gcp_sa_cloud_sql" {
   provider = google-beta
   service  = var.sql_admin_api
-  project = var.project_id
+  project  = var.project_id
 }
 
 resource "google_kms_crypto_key_iam_binding" "crypto_key" {
@@ -300,7 +300,7 @@ resource "google_kms_crypto_key_iam_binding" "crypto_key" {
 resource "google_service_account" "cloud_storage_service_acc" {
   account_id   = var.cloud_storage_acc_id
   display_name = var.cloud_storage_display_name
-  project = var.project_id
+  project      = var.project_id
 }
 
 resource "google_service_account" "service_account" {
@@ -521,7 +521,7 @@ resource "google_compute_region_instance_template" "cloud_vpc_instance_template"
     }
   }
 
-  depends_on = [ google_kms_crypto_key_iam_binding.vm_encrypter_decrypter ]
+  depends_on = [google_kms_crypto_key_iam_binding.vm_encrypter_decrypter]
 
   network_interface {
     network    = google_compute_network.vpc_network.self_link
@@ -554,8 +554,8 @@ resource "google_compute_region_instance_template" "cloud_vpc_instance_template"
 }
 
 resource "google_secret_manager_secret" "webapp_secret" {
-  provider = google-beta
-  project = var.project_id
+  provider  = google-beta
+  project   = var.project_id
   secret_id = var.secret_id
 
   replication {
@@ -568,9 +568,9 @@ resource "google_secret_manager_secret" "webapp_secret" {
 }
 
 resource "google_secret_manager_secret_version" "env_secret" {
-  provider = google-beta
+  provider    = google-beta
   secret      = google_secret_manager_secret.webapp_secret.id
-  secret_data = "${google_sql_user.db_user.password}"
+  secret_data = google_sql_user.db_user.password
 }
 
 
@@ -584,7 +584,7 @@ resource "google_kms_crypto_key" "crypto_key_vms" {
   name            = var.vm_key
   key_ring        = google_kms_key_ring.webapp_keyring.id
   rotation_period = var.rotation_period
-lifecycle {
+  lifecycle {
     prevent_destroy = false
   }
 
@@ -594,10 +594,10 @@ resource "google_kms_crypto_key" "crypto_key_cloudsql" {
   name            = var.cloud_sql_key
   key_ring        = google_kms_key_ring.webapp_keyring.id
   rotation_period = var.rotation_period
-lifecycle {
+  lifecycle {
     prevent_destroy = false
   }
- 
+
 }
 
 resource "google_kms_crypto_key" "crypto_key_bucket" {
@@ -607,7 +607,7 @@ resource "google_kms_crypto_key" "crypto_key_bucket" {
   lifecycle {
     prevent_destroy = false
   }
-  
+
 }
 
 data "google_storage_project_service_account" "gcs_account" {

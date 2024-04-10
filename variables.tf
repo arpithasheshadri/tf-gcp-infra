@@ -613,27 +613,27 @@ variable "key_ring_name" {
 
 variable "sql_admin_api" {
   description = "SQL Admin api"
-  type = string
+  type        = string
 }
 
 variable "crypto_encrypter_decrypter" {
   description = "Encrypter Decrypter role"
-  type = string
+  type        = string
 }
 
 variable "cloud_storage_acc_id" {
   description = "Cloud storage acc id"
-  type = string
+  type        = string
 }
 
 variable "cloud_storage_display_name" {
   description = "Cloud storage display name"
-  type = string
+  type        = string
 }
 
 variable "role_instance_admin" {
   description = "Role instance admin"
-  type = string
+  type        = string
 }
 
 variable "backend_timeout" {
