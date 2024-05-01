@@ -467,12 +467,12 @@ variable "unhealthy_threshold" {
 }
 
 variable "gloabl_address_name" {
-  type        = number
+  type        = string
   description = "gloabl address name"
 }
 
 variable "autoscaler_name" {
-  type        = number
+  type        = string
   description = "autoscaler name"
 }
 
@@ -492,12 +492,12 @@ variable "cooldown_period" {
 }
 
 variable "https_proxy" {
-  type        = number
+  type        = string
   description = "https proxy name"
 }
 
 variable "ssl_cert_name" {
-  type        = number
+  type        = string
   description = "ssl certificate name"
 }
 
@@ -569,4 +569,99 @@ variable "base_name" {
 variable "target_size" {
   type        = number
   description = "target size"
+}
+
+variable "cloud_function_invoker_role" {
+  description = "The IAM role for invoking Cloud Functions"
+  type        = string
+}
+
+variable "cloud_run_invoker_role" {
+  description = "The IAM role for invoking Cloud Run services"
+  type        = string
+}
+
+variable "cloud_service_account_id" {
+  description = "Cloud service account id"
+  type        = string
+}
+
+variable "cloud_service_account_name" {
+  description = "Cloud service account name"
+  type        = string
+}
+
+variable "cloud_sql_key" {
+  description = "cloud sql Key"
+  type        = string
+}
+
+variable "bucket_key" {
+  description = "bucket Key"
+  type        = string
+}
+
+variable "vm_key" {
+  description = "vm Key"
+  type        = string
+}
+
+variable "key_ring_name" {
+  description = "Key Ring"
+  type        = string
+}
+
+variable "sql_admin_api" {
+  description = "SQL Admin api"
+  type        = string
+}
+
+variable "crypto_encrypter_decrypter" {
+  description = "Encrypter Decrypter role"
+  type        = string
+}
+
+variable "cloud_storage_acc_id" {
+  description = "Cloud storage acc id"
+  type        = string
+}
+
+variable "cloud_storage_display_name" {
+  description = "Cloud storage display name"
+  type        = string
+}
+
+variable "role_instance_admin" {
+  description = "Role instance admin"
+  type        = string
+}
+
+variable "backend_timeout" {
+  description = "Backend timeout"
+  type        = number
+  default     = 30
+}
+
+variable "capacity_scaler_val" {
+  description = "Capacity scaler value"
+  type        = number
+  default     = 1.0
+}
+
+variable "secret_id" {
+  description = "Secret ID"
+  type        = string
+  default     = "webapp_secret"
+}
+
+variable "rotation_period" {
+  description = "Rotation period"
+  type        = string
+  default     = "2592000s"
+}
+
+variable "cpu_util" {
+  description = "CPU utilization"
+  type        = number
+  default     = 0.2
 }
